@@ -233,16 +233,24 @@ class AutoComplete {
         this.editor.execCommand('mceInsertContent', false, this.options.insert!(item as ACListItem, this.options));
     }
 
-    private offset(): { top: number; left: number } {
-        const rtePosition = this.editor.getContainer().getBoundingClientRect();
-        const contentAreaPosition = this.editor.getContentAreaContainer().getBoundingClientRect();
-        const nodePosition = (this.editor.dom.select('span#autocomplete')[0] as HTMLElement).getBoundingClientRect();
-
-        return {
-            top: rtePosition.top + contentAreaPosition.top + nodePosition.top + (this.editor.selection.getNode() as HTMLElement).offsetHeight - this.editor.getDoc().scrollTop + 5,
-            left: rtePosition.left + contentAreaPosition.left + nodePosition.left,
-        };
+private offset(): { top: number; left: number } {
+    const autoCompleteSpan = this.editor.dom.select('span#autocomplete')[0] as HTMLElement;
+    if (!autoCompleteSpan) {
+        // Fallback to zero or skip
+        return { top: 0, left: 0 };
     }
+
+    const rtePosition = this.editor.getContainer()?.getBoundingClientRect?.() || { top: 0, left: 0 };
+    const contentAreaPosition = this.editor.getContentAreaContainer()?.getBoundingClientRect?.() || { top: 0, left: 0 };
+    const nodePosition = autoCompleteSpan.getBoundingClientRect();
+
+    return {
+        top: rtePosition.top + contentAreaPosition.top + nodePosition.top 
+             + (this.editor.selection.getNode() as HTMLElement).offsetHeight
+             - this.editor.getDoc().scrollTop + 5,
+        left: rtePosition.left + contentAreaPosition.left + nodePosition.left,
+    };
+}
 
     private cleanUp(rollback: boolean): void {
         this.unbindEvents();
